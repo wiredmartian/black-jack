@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using BlackJac.Models;
 
 namespace BlackJac
 {
@@ -11,47 +10,70 @@ namespace BlackJac
         private static readonly List<Card> LoadedDeckList = new List<Card>();
         static void Main(string[] args)
         {
+            /*
+             * load the deck, the complete set should be 52 cards
+             */
             PopulateDeck();
-            Console.WriteLine($"{LoadedDeckList.Count}");
-            ConsoleKey response;
-            
-            bool roundComplete = false;
+
+            bool gameComplete = false; // game state
             int playerTotal = 0;
             int dealerTotal = 0;
             Console.ForegroundColor = ConsoleColor.Magenta;
             Console.WriteLine("--- SERVING PLAYER ---");
+            /*
+             * keep processing inputs while the game is still in session
+             * while (!gameComplete);
+             */
             do
             {
+                /*
+                 * process only [N/Y] key responses
+                 * while (response != ConsoleKey.Y && response != ConsoleKey.N);
+                 */
+                ConsoleKey response;
                 do
                 {
                     Console.Write("Do you wanna receive a card [Y/N] ");
                     response = Console.ReadKey(false).Key;  
                     Console.WriteLine();
-                    if (response == ConsoleKey.Y)
+                    switch (response)
                     {
-                        var card = ServeCard();
-                        playerTotal += card.Value;
-                        
-                        Console.WriteLine($"Served card:: {card.Name} of {card.Suit}");
-                        Console.WriteLine($"PLAYER TOTAL:: {playerTotal}");
-                        LoadedDeckList.Remove(card);
-                        
-                        if (playerTotal > 21)
+                        /*
+                         * the player gets served first until he/she replies [N]
+                         */
+                        case ConsoleKey.Y:
                         {
-                            Console.WriteLine();
-                            Console.ForegroundColor = ConsoleColor.Red;
-                            Console.WriteLine($"!! PLAYER HAS LOST !!");
-                            roundComplete = true;
-                        }
+                            var card = ServeCard();
+                            playerTotal += card.Value;
+                        
+                            Console.WriteLine($"Served card:: {card.Name} of {card.Suit}");
+                            Console.WriteLine($"PLAYER TOTAL:: {playerTotal}");
+                            LoadedDeckList.Remove(card);
+                        
+                            // terminate the game is the total is over 21
+                            if (playerTotal > 21)
+                            {
+                                Console.WriteLine();
+                                Console.ForegroundColor = ConsoleColor.Red;
+                                Console.WriteLine($"!! PLAYER HAS LOST !!");
+                                gameComplete = true;
+                            }
 
-                    }
-                    if (response == ConsoleKey.N)
-                    {
-                        if (playerTotal != 0)
+                            break;
+                        }
+                        // this condition is in case the player replies [N] on first iteration
+                        case ConsoleKey.N when playerTotal == 0:
+                            continue;
+                        case ConsoleKey.N:
                         {
+                            /*
+                             * the player replied [N]
+                             * lets serve the dealer
+                             */
                             Console.WriteLine();
                             Console.ForegroundColor = ConsoleColor.Yellow;
                             Console.WriteLine("--- SERVING DEALER ---");
+                            // continue to serve the dealer while his/her total is under 17
                             while (dealerTotal < 17)
                             {
                                 var newCard = ServeCard();
@@ -59,6 +81,8 @@ namespace BlackJac
                                 Console.WriteLine($"Served card:: {newCard.Name} of {newCard.Suit}");
                                 Console.WriteLine($"DEALER TOTAL:: {dealerTotal}");
                                 LoadedDeckList.Remove(newCard);
+                            
+                                // terminate the game is the total is over 21
                                 if (dealerTotal > 21)
                                 {
                                     Console.WriteLine();
@@ -67,10 +91,14 @@ namespace BlackJac
                                 }
                             }
                             Console.WriteLine();
-                        
+                            /*
+                         * neither the player nor dealer went over 21
+                         * find the winner
+                         */
                             if (dealerTotal <= 21 && playerTotal <= 21)
                             {
                                 var winnerMessage = (playerTotal > dealerTotal) ? "!! PLAYER WINS !!" : "!! DEALER WINS !!";
+                                // there is a possible draw
                                 if (playerTotal == dealerTotal)
                                 {
                                     winnerMessage = "!! ITS A DRAW !!";
@@ -79,12 +107,12 @@ namespace BlackJac
                                 Console.WriteLine(winnerMessage);
                             }
 
-                            roundComplete = true;
+                            gameComplete = true;
+                            break;
                         }
                     }
                 } while (response != ConsoleKey.Y && response != ConsoleKey.N);
-                
-            } while (!roundComplete);
+            } while (!gameComplete);
 
         }
 
@@ -92,10 +120,8 @@ namespace BlackJac
         {
             var cards = new Dictionary<string, int>()
             {
-                { "J", 10 }, { "K", 10 }, { "Q", 10 },
-                { "Ace", 1 }, { "2", 2 }, { "3", 3 },
-                { "4", 4 }, { "5", 5 }, { "6", 6 },
-                { "7", 7 }, { "8", 8 }, { "9", 9 }, { "10", 10 }, 
+                { "J", 10 }, { "K", 10 }, { "Q", 10 }, { "A", 1 }, { "2", 2 }, { "3", 3 },
+                { "4", 4 }, { "5", 5 }, { "6", 6 }, { "7", 7 }, { "8", 8 }, { "9", 9 }, { "10", 10 }, 
             };
             foreach (var s in Suits)
             {
@@ -103,7 +129,6 @@ namespace BlackJac
                 {
                     LoadedDeckList.Add(new Card()
                     {
-                        Id = Guid.NewGuid(),
                         Name = cards.ElementAt(x).Key,
                         Value = cards.ElementAt(x).Value,
                         Suit = s
@@ -119,4 +144,10 @@ namespace BlackJac
             return LoadedDeckList[ranCard];
         }
     }
+}
+public class Card
+{
+    public string Name { get; set; }
+    public int Value { get; set; }
+    public string Suit { get; set; }
 }
