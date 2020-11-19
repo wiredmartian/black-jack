@@ -33,7 +33,7 @@ namespace BlackJac
                 ConsoleKey response;
                 do
                 {
-                    Console.Write("Do you wanna receive a card [Y/N] ");
+                    Console.Write("Receive a new card? [Y/N] ");
                     response = Console.ReadKey(false).Key;  
                     Console.WriteLine();
                     switch (response)
