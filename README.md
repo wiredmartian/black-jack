@@ -1,11 +1,9 @@
 
-### Derivco Black Jack Assessment
+### Black Jack
 
 #### Running the app
 
 You need the .NET Core 3.1 SDK installed on your machine.
-
-This might be a plug and play for Visual Studio, but I've done this on VsCode on Linux.
 
 On your terminal run the following:
 
@@ -14,4 +12,6 @@ On your terminal run the following:
 `$ dotnet run` - to run the app
 
 
+## SAMPLE
 
+<img src="https://raw.githubusercontent.com/wiredmartian/black-jack/main/sample.png" />
